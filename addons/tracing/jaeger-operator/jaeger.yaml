@@ -1,0 +1,36 @@
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: dev-jaeger
+  namespace: observability
+spec:
+  strategy: allInOne
+  allInOne:
+    image: 10.60.11.1/jaegertracing/all-in-one:latest
+    options:
+      log-level: info
+  storage:
+    type: elasticsearch
+    options:
+      es:
+        server-urls: http://elasticsearch-logging:9200
+      es-provision: false
+    esIndexCleaner:
+      enabled: true
+      numberOfDays: 7
+      schedule: "55 20 * * *"
+      image: 10.60.11.1/jaegertracing/jaeger-es-index-cleaner:1.15.0
+    dependencies:
+      enabled: true
+      schedule: "55 21 * * *"
+      sparkMaster:
+      image: 10.60.11.1/jaegertracing/spark-dependencies
+  ingress:
+    enabled: false
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: ""
+  sampling:
+    options:
+      default_strategy:
+        type: probabilistic
+        param: 50

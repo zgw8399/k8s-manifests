@@ -1,0 +1,59 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: simpleingressroute
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`whoami.i-keda.com`) && PathPrefix(`/notls`)
+      kind: Rule
+      services:
+        - name: whoami
+          port: 80
+      middlewares:
+        - name: simpleingressroute-header
+          namespace: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroutetls
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`whoami.i-keda.com`) && PathPrefix(`/tls`)
+      kind: Rule
+      services:
+        - name: whoami
+          port: 80
+      middlewares:
+        - name: ingressroutetls-header
+          namespace: default
+  tls:
+    certResolver: default
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: simpleingressroute-header
+  namespace: default
+spec:
+  headers:
+    customRequestHeaders:
+      l5d-dst-override: "whoami.default.svc.cluster.local:80"
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: ingressroutetls-header
+  namespace: default
+spec:
+  headers:
+    customRequestHeaders:
+      l5d-dst-override: "whoami.default.svc.cluster.local:80"

@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: grafana-chown
+  namespace: monitoring
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: grafana-chown
+        command: ["chown", "-R", "472:472", "/var/lib/grafana"]
+        image: 10.60.11.1/library/busybox
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+      volumes:
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: grafana

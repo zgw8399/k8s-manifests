@@ -1,0 +1,15 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: cephfs-test-pod
+spec:
+  containers:
+  - name: cephfs-test-pod
+    image:  tools:v2
+    volumeMounts:
+      - name: pvc
+        mountPath: "/mnt"
+  volumes:
+    - name: pvc
+      persistentVolumeClaim:
+        claimName: claim-cephfs

@@ -1,0 +1,49 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: linkerd-dashboard-route
+  namespace: linkerd
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`sm.i-keda.com`)
+      kind: Rule
+      services:
+        - name: linkerd-web
+          port: 8084
+      middlewares:
+        - name: linkerd-dashboard-auth
+          namespace: linkerd
+        - name: linkerd-dashboard-header
+          namespace: linkerd
+---
+# Declaring the user list
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: linkerd-dashboard-auth
+  namespace: linkerd
+spec:
+  basicAuth:
+    secret: linkerd-dashboard-authsecret
+    removeHeader: false
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: linkerd-dashboard-authsecret
+  namespace: linkerd
+data:
+  users: |2
+    YWRtaW46JGFwcjEkeWJaelRWLjIkekJYbT2tROXpwaGpLV2FZZkxDLgo=
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: linkerd-dashboard-header
+  namespace: linkerd
+spec:
+  headers:
+    customRequestHeaders:
+      l5d-dst-override: "linkerd-web.linkerd.svc.cluster.local:8084"

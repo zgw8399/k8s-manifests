@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  namespace: ingress
+  labels:
+    k8s-app: traefik-ingress
+spec:
+  ports:
+    - name: web
+      port: 80
+      targetPort: 80
+      protocol: TCP
+    - name: websecure
+      port: 443
+      targetPort: 443
+      protocol: TCP
+    - name: admin
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: traefik
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: traefik
+  namespace: monitoring
+  labels:
+    k8s-app: traefik-ingress
+spec:
+  jobLabel: k8s-app
+  endpoints:
+  - port: admin
+    interval: 30s
+  selector:
+    matchLabels:
+      k8s-app: traefik-ingress
+  namespaceSelector:
+    matchNames:
+    - ingress

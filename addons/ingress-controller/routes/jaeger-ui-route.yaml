@@ -1,0 +1,48 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: jaeger-ui-route
+  namespace: observability
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`tracing.i-keda.com`)
+      kind: Rule
+      services:
+        - name: dev-jaeger-query
+          port: 16686
+      middlewares:
+        - name: jaeger-ui-auth
+          namespace: observability
+        - name: jaeger-ui-header
+          namespace: observability
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: jaeger-ui-auth
+  namespace: observability
+spec:
+  basicAuth:
+    secret: jaeger-ui-authsecret
+    removeHeader: false
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jaeger-ui-authsecret
+  namespace: observability
+data:
+  users: |2
+    YWRtaW46JGFwcjEkeWJaejIkekJYbTIzS2tROXpwaGpLV2FZZkxDLgo=
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: jaeger-ui-header
+  namespace: observability
+spec:
+  headers:
+    customRequestHeaders:
+      l5d-dst-override: "dev-jaeger-query.observability.svc.cluster.local:16686"

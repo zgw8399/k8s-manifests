@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: emojivoto
+  annotations:
+    config.linkerd.io/trace-collector: "oc-collector.observability:55678"

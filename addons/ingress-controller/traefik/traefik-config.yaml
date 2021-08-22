@@ -1,0 +1,63 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: traefik-config
+  namespace: ingress
+data:
+  traefik.yaml: |-
+    serversTransport:
+      insecureSkipVerify: true
+    api:
+      insecure: true
+      dashboard: true
+      debug: true
+    metrics:
+      prometheus:
+        buckets:
+          - 0.1
+          - 0.3
+          - 1.2
+          - 5.0
+        entryPoint: traefik
+    entryPoints:
+      web:
+        address: ":80"
+      websecure:
+        address: ":443"
+      traefik:
+        address: ":8080"
+    providers:
+      kubernetesCRD: ""
+    log:
+      filePath: ""
+      level: error
+      format: json
+    accessLog:
+      filePath: ""
+      format: json
+      bufferingSize: 0
+      filters:
+        retryAttempts: true
+        minDuration: 20
+      fields:
+        defaultMode: keep
+        names:
+          ClientUsername: drop
+        headers:
+          defaultMode: keep
+          names:
+            User-Agent: redact
+            Authorization: drop
+            Content-Type: keep
+    ping: {}
+    tracing:
+      jaeger:
+        samplingServerURL: http://dev-jaeger-agent.observability:5778/sampling
+        samplingType: probabilistic
+        samplingParam: 0.5
+        localAgentHostPort: dev-jaeger-agent.observability:6831
+        gen128Bit: true
+        propagation: b3
+        traceContextHeaderName: uber-trace-id
+        collector:
+          endpoint: http://dev-jaeger-collector.observability:14268/api/traces?format=jaeger.thrift

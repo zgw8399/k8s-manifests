@@ -1,0 +1,29 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: emojivoto-ingress-route
+  namespace: emojivoto
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`emojivoto.i-keda.com`)
+      kind: Rule
+      services:
+        - name: web-svc
+          port: 80
+      middlewares:
+        - name: emojivoto-ingress-route-header
+          namespace: emojivoto
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: emojivoto-ingress-route-header
+  namespace: emojivoto
+spec:
+  headers:
+    customRequestHeaders:
+      l5d-dst-override: "web-svc.emojivoto.svc.cluster.local:80"
