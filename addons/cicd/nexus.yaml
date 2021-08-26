@@ -37,7 +37,7 @@ spec:
     spec:
       containers:
       - name: sonatype-nexus
-        image: 10.60.101.19/cicd/nexus3:3.24.0
+        image: nexus3:3.24.0
         imagePullPolicy: IfNotPresent
         ports:
         - name: server
@@ -71,8 +71,8 @@ spec:
             cpu: 4000m  #推荐设置为4000m以上cpu，由于资源有限，所以都是设置的最小值
             memory: 4096Mi   
           requests:
-            cpu: 1000m
-            memory: 2048Mi
+            cpu: 4000m
+            memory: 4096Mi
         volumeMounts:
         - name: sonatype-nexus-data
           mountPath: /nexus-data
